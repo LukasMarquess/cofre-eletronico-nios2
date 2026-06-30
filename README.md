@@ -65,8 +65,7 @@ O código em C interage diretamente com o hardware físico, sem o auxílio de bi
 Este projeto foi desenvolvido em conjunto por:
 
 * **[Lucas Marques]** - [GitHub](https://github.com/LukasMarquess)
-* **[Nome do(a) Colega 1]** - [GitHub](link-do-github)
-* **[Nome do(a) Colega 2]** - [GitHub](link-do-github)
+* **[Hipolito Felipe]** - [GitHub](https://github.com/iflipe)
 
 ---
 

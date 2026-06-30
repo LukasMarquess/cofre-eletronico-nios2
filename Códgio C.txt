@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <unistd.h>
+#include "system.h"
+#include "sys/alt_stdio.h"
+#include "altera_avalon_pio_regs.h"
+#include "io.h"
+
+#define SENHA_CORRETA 170
+
+void lcd_comando(char cmd) {
+    IOWR(LCD_BASE, 0, cmd);
+    usleep(5000);
+}
+
+void lcd_caractere(char dado) {
+    IOWR(LCD_BASE, 2, dado);
+    usleep(5000);
+}
+
+void lcd_texto(char *texto) {
+    while (*texto) {
+        lcd_caractere(*texto++);
+    }
+}
+
+void lcd_limpar() {
+    lcd_comando(0x01);
+    usleep(5000);
+}
+
+void lcd_linha2() {
+    lcd_comando(0xC0);
+}
+
+void lcd_init() {
+    usleep(50000);
+    lcd_comando(0x38);
+    lcd_comando(0x0C);
+    lcd_comando(0x06);
+    lcd_limpar();
+}
+
+// --- Lógica Principal do Cofre ---
+
+int main() {
+    int tentativas_erradas = 0;
+    int status_botao = 1;
+    int status_botao_anterior = 1;
+
+    lcd_init();
+    lcd_texto("Cofre Eletronico");
+    lcd_linha2();
+    lcd_texto("Insira a senha:");
+
+    IOWR_ALTERA_AVALON_PIO_DATA(LEDS_COFRE_BASE, 0x00);
+
+    while(1) {
+        status_botao = IORD_ALTERA_AVALON_PIO_DATA(BOTAO_CONFIRMA_BASE);
+
+        if (status_botao == 0 && status_botao_anterior == 1) {
+            int senha_inserida = IORD_ALTERA_AVALON_PIO_DATA(SWITCHES_SENHA_BASE);
+
+            if (senha_inserida == SENHA_CORRETA) {
+                lcd_limpar();
+                lcd_texto("Acesso Permitido");
+                lcd_linha2();
+                lcd_texto("Cofre Aberto!");
+
+                IOWR_ALTERA_AVALON_PIO_DATA(LEDS_COFRE_BASE, 2);
+                tentativas_erradas = 0;
+
+            } else {
+                tentativas_erradas++;
+
+                lcd_limpar();
+                lcd_texto("Senha Incorreta!");
+                lcd_linha2();
+                lcd_texto("Tentativa ");
+                lcd_caractere('0' + tentativas_erradas);
+                lcd_texto(" de 3");
+
+                IOWR_ALTERA_AVALON_PIO_DATA(LEDS_COFRE_BASE, 1);
+
+                if (tentativas_erradas >= 3) {
+                    lcd_limpar();
+                    lcd_texto("SISTEMA TRAVADO");
+                    lcd_linha2();
+                    lcd_texto("Aguarde 10s...");
+
+                    int i;
+                    for(i = 0; i < 10; i++) {
+                        IOWR_ALTERA_AVALON_PIO_DATA(LEDS_COFRE_BASE, 1);
+                        usleep(500000);
+                        IOWR_ALTERA_AVALON_PIO_DATA(LEDS_COFRE_BASE, 0);
+                        usleep(500000);
+                    }
+
+                    tentativas_erradas = 0;
+
+                    lcd_limpar();
+                    lcd_texto("Sistema Liberado");
+                    lcd_linha2();
+                    lcd_texto("Insira a senha:");
+                }
+            }
+        }
+        status_botao_anterior = status_botao;
+        usleep(10000);
+    }
+    return 0;
+}

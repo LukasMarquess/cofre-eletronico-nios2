@@ -1,0 +1,56 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity cofre_eletronico is
+Port (
+-- Clock e Entradas
+CLOCK_50 : in STD_LOGIC;
+KEY : in STD_LOGIC_VECTOR(0 downto 0);
+SW : in STD_LOGIC_VECTOR(7 downto 0);
+KEY_CONFIRMA : in STD_LOGIC_VECTOR(1 downto 1);
+-- LEDs
+LEDR : out STD_LOGIC_VECTOR(1 downto 0);
+-- Interface LCD
+LCD_DATA : inout STD_LOGIC_VECTOR(7 downto 0);
+LCD_EN : out STD_LOGIC;
+LCD_RS : out STD_LOGIC;
+LCD_RW : out STD_LOGIC;
+LCD_ON : out STD_LOGIC;
+LCD_BLON : out STD_LOGIC
+);
+end cofre_eletronico;
+
+architecture Behavioral of cofre_eletronico is
+component meu_sistema
+Port (
+clk_clk : in STD_LOGIC;
+reset_reset_n : in STD_LOGIC;
+switches_senha_external_connection_export : in STD_LOGIC_VECTOR(7 downto 0);
+botao_confirma_external_connection_export : in STD_LOGIC_VECTOR(1 downto 1);
+leds_cofre_external_connection_export : out STD_LOGIC_VECTOR(1 downto 0);
+lcd_external_data : inout STD_LOGIC_VECTOR(7 downto 0);
+lcd_external_E : out STD_LOGIC;
+lcd_external_RS : out STD_LOGIC;
+lcd_external_RW : out STD_LOGIC
+);
+end component;
+
+begin
+-- Mantém o LCD ligado
+LCD_ON <= '1';
+LCD_BLON <= '1';
+-- Instanciação do sistema gerado pelo Qsys
+u0 : meu_sistema
+port map (
+clk_clk => CLOCK_50,
+reset_reset_n => KEY(0),
+switches_senha_external_connection_export => SW,
+botao_confirma_external_connection_export => KEY_CONFIRMA,
+leds_cofre_external_connection_export => LEDR,
+lcd_external_data => LCD_DATA,
+lcd_external_E => LCD_EN,
+lcd_external_RS => LCD_RS,
+lcd_external_RW => LCD_RW
+);
+
+end Behavioral;

@@ -67,6 +67,7 @@ Este projeto foi desenvolvido em conjunto por:
 * **[Lucas Marques]** - [GitHub](https://github.com/LukasMarquess)
 * **[Hipolito Felipe]** - [GitHub](https://github.com/iflipe)
 * **[Celine Andrade]** - [GitHub](https://github.com/celinehelena)
+* **[Kiev Luiz]** - [GitHub](https://github.com/kievlz)
 
 ---
 
